@@ -8,7 +8,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.TreeMap;
 
 import javax.crypto.Mac;
@@ -133,39 +132,6 @@ public class BlueroverApi {
 		return null;
 	}
 
-	public static void main(String[] args) throws Exception {
-		BlueroverApi api = new BlueroverApi();
-		TreeMap<String, String> creds = new TreeMap<String, String>();
-		// siloman to test calls
-		creds.put("key",
-				"yXIJ1omZUNtbo6wNjMOkKYBLNJakn0nr/OzgVtDKh2i5lDktVT2xv5xfbYlCkW+Z");
-		creds.put("token", "9DquKlyhPKpZ35mxcjG/JUqWAd//U12O13ja6Wqp");
-		creds.put("baseURL", "http://developers.polairus.com");
-		api.setCredentials(creds);
-		System.out.println("Testing 1 - Send Http GET request (no stream)");
-		// '/event', {'end_time':end,'start_time':start,'page':page}
-		TreeMap<String, String> times = new TreeMap<String, String>();
-		long startTime = System.currentTimeMillis() / 1000L - 5 * 60 * 1000;
-		long endTime = System.currentTimeMillis() / 1000L;
-		times.put("start_time", Objects.toString(startTime, null));
-		times.put("end_time", Objects.toString(endTime, null));
-		times.put("page", "1");
-		String result = api.callApi("/event", times, false);
-		System.out.println(result);
-
-		// foodsafety to test stream
-//		creds.put("key",
-//		"0OZW0W/dO8KiWlmee24z7S8YxZGqb9ALYDT1x3QUsgpJvYzpiPCgZHoiu7QKUIdQ");
-//		creds.put("token", "v0P6TZqlK3QQ5dHpg8FgEno2GRx6Phh+w9QQQ7vH");
-//		creds.put("baseURL", "http://developers.polairus.com");
-//		api.setCredentials(creds);
-//		
-//		String result = api.streamApi("/eventstream",
-//		new TreeMap<String, String>(), false);
-//		System.out.println(result);
-
-	}
-
 	private String generateSignature(String pKey, String pMethod, URL pUrl,
 			TreeMap<String, String> params) {
 		String normalizedURL = pUrl.getProtocol().toLowerCase() + "://"
@@ -200,7 +166,6 @@ public class BlueroverApi {
 	}
 
 	private static String oauthHmacSha1(String pKey, String substring) {
-		System.out.println(substring);
 		try {
 			// Get an hmac_sha1 key from the raw key bytes
 			SecretKeySpec signingKey = new SecretKeySpec(pKey.getBytes(),

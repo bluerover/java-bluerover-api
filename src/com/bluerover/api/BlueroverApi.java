@@ -1,9 +1,9 @@
 package com.bluerover.api;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -18,7 +18,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
+import org.json.simple.parser.ParseException;
 
 public class BlueroverApi {
 
@@ -43,9 +45,33 @@ public class BlueroverApi {
 		this.token = "";
 	}
 
-	public String callApi(String relativeURL, TreeMap<String, String> params,
-			boolean post_data) throws ClientProtocolException, IOException {
+	public Result getEvents(String startTime, String endTime,
+			String page) throws IOException, ParseException {
+		TreeMap<String, String> params = new TreeMap<String, String>();
+		params.put("start_time", startTime);
+		params.put("end_time", endTime);
+		params.put("page", page);
+		HttpGet request = generateRequest("/event", params, false);
+		return(callApi(request));
+	}
 
+	public Result next(Result pResult) {
+		Result result = null;
+		try {
+			result = callApi(pResult.getNext());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.err.println("Error with connecting to server");
+			e.printStackTrace();
+		} catch (ParseException e) {
+			System.err.println("improperly formatted json");
+			e.printStackTrace();
+		}
+		return result;
+	}
+	private HttpGet generateRequest(String relativeURL,
+			TreeMap<String, String> params, boolean post_data)
+			throws MalformedURLException {
 		// Post data not supported yet
 		post_data = false;
 
@@ -64,32 +90,52 @@ public class BlueroverApi {
 				String value = entry.getValue();
 				joinedParams.append(key + "=" + value + "&");
 			}
-			endpointURL += joinedParams.substring(0,joinedParams.length()-1);
+			endpointURL += joinedParams.substring(0, joinedParams.length() - 1);
 		}
-
-		HttpClient client = HttpClients.createDefault();
 		HttpGet request = new HttpGet(endpointURL);
 		request.addHeader("Authorization", "BR " + this.token + ":" + signature);
-		HttpResponse response = client.execute(request);
-
-		System.out.println("\nSending 'GET' request to URL : " + endpointURL);
-		System.out.println("Response Code : "
-				+ response.getStatusLine().getStatusCode());
-
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response
-				.getEntity().getContent()));
-
-		StringBuffer result = new StringBuffer();
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			result.append(line);
+		return request;
+	}
+	
+	private HttpGet generateRequest(URI pUri) throws MalformedURLException {
+		
+		String[] queryParams = pUri.getQuery().split("&");
+		TreeMap<String,String> params = new TreeMap<String,String>();
+		for(String param : queryParams) {
+			String[] tmp = param.split("=");
+			params.put(tmp[0], tmp[1]);
 		}
-
-		return result.toString();
+		//Add 1 to the page #
+		params.put("page", Integer.toString(Integer.parseInt(params.get("page")+1)));
+		
+		return generateRequest(pUri.getPath(), params, false);
 	}
 
-	public String streamApi(String relativeURL, TreeMap<String, String> params,
-			boolean post_data) throws ClientProtocolException, IOException {
+	private Result callApi(HttpUriRequest pRequest) throws ParseException, IOException {
+		HttpClient client = HttpClients.createDefault();
+		HttpResponse response = null;
+		try {
+			response = client.execute(pRequest);
+		} catch (IOException e) {
+			System.err.println("Request to " + pRequest.getURI().toString() + " failed:");
+			e.printStackTrace();
+		}
+
+		System.out.println("Response Code : "
+				+ response.getStatusLine().getStatusCode());
+		if(response.getStatusLine().getStatusCode() == 403) {
+			throw new SecurityException("invalid credentials");
+		}
+		Result result = new Result(pRequest, response);
+		if (result.getPages() > 0) {
+			result.setNext(generateRequest(pRequest.getURI()));
+		}
+		return result;
+	}
+
+	private String streamApi(String relativeURL,
+			TreeMap<String, String> params, boolean post_data)
+			throws ClientProtocolException, IOException {
 		// Post data not supported yet
 		post_data = false;
 
@@ -147,8 +193,7 @@ public class BlueroverApi {
 				String value = entry.getValue();
 				combinedParams.append(key + "=" + value + "&");
 			}
-			baseArray.add(combinedParams.substring(0,
-					combinedParams.length()));
+			baseArray.add(combinedParams.substring(0, combinedParams.length()));
 		}
 
 		// then you unicode encode
@@ -156,12 +201,13 @@ public class BlueroverApi {
 		for (String s : baseArray) {
 			escapedParams.append(encodeURI(s) + '&');
 		}
-		
-		//shave off '%26&' if there are params
-		if(!params.isEmpty()) {
-			escapedParams = escapedParams.delete(escapedParams.length()-4, escapedParams.length());
+
+		// shave off '%26&' if there are params
+		if (!params.isEmpty()) {
+			escapedParams = escapedParams.delete(escapedParams.length() - 4,
+					escapedParams.length());
 		}
-		
+
 		return oauthHmacSha1(pKey, escapedParams.toString());
 	}
 

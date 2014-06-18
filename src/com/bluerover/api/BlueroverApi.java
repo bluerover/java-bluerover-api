@@ -24,6 +24,9 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClients;
 
 import com.bluerover.gson.ResultDeserializer;
+import com.bluerover.model.Device;
+import com.bluerover.model.Event;
+import com.bluerover.model.Result;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -35,7 +38,16 @@ public class BlueroverApi {
 	String token;
 	String baseURL;
 
-	public void setCredentials(TreeMap<String, String> pMap) {
+	Gson gson;
+	
+	@SuppressWarnings("rawtypes")
+	public BlueroverApi() {
+		GsonBuilder gsonBuilder = new GsonBuilder();
+	    gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
+		gson = gsonBuilder.create();
+	}
+	
+	public BlueroverApi setCredentials(TreeMap<String, String> pMap) {
 		if (isNullOrEmpty(pMap.get("key")) || isNullOrEmpty(pMap.get("token"))
 				|| isNullOrEmpty(pMap.get("baseURL"))) {
 			throw new SecurityException("key, token, or baseURL is null/empty");
@@ -43,6 +55,8 @@ public class BlueroverApi {
 		this.key = pMap.get("key");
 		this.token = pMap.get("token");
 		this.baseURL = pMap.get("baseURL");
+		
+		return this;
 	}
 
 	public void clearCredentials() {
@@ -50,18 +64,25 @@ public class BlueroverApi {
 		this.token = "";
 	}
 
-	public Result getEvents(String startTime, String endTime,
+	public Result<Event> getEvents(String startTime, String endTime,
 			String page) throws IOException {
 		TreeMap<String, String> params = new TreeMap<String, String>();
 		params.put("start_time", startTime);
 		params.put("end_time", endTime);
 		params.put("page", page);
 		HttpGet request = generateRequest("/event", params, false);
-		return(callApi(request));
+		Result<Event> results = callApi(request); 
+		return results;
+	}
+	
+	public Result<Device> getDevices() throws IOException {
+		HttpGet request = generateRequest("/device", new TreeMap<String,String>(), false);
+		Result<Device> results = callApi(request); 
+		return results;
 	}
 
-	public Result next(Result pResult) {
-		Result result = null;
+	public <T> Result<T> next(Result<T> pResult) {
+		Result<T> result = null;
 		try {
 			result = callApi(pResult.getNext());
 		} catch (IOException e) {
@@ -113,7 +134,8 @@ public class BlueroverApi {
 		return generateRequest(pUri.getPath(), params, false);
 	}
 
-	private Result callApi(HttpUriRequest pRequest) throws IOException {
+	@SuppressWarnings("unchecked")
+	private <T> Result<T> callApi(HttpUriRequest pRequest) throws IOException {
 		HttpClient client = HttpClients.createDefault();
 		HttpResponse response = null;
 		try {
@@ -128,12 +150,10 @@ public class BlueroverApi {
 		if(response.getStatusLine().getStatusCode() == 403) {
 			throw new SecurityException("invalid credentials");
 		}
-		GsonBuilder gsonBuilder = new GsonBuilder();
-	    gsonBuilder.registerTypeAdapter(Result.class, new ResultDeserializer());
-		Gson gson = gsonBuilder.create();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response
 				.getEntity().getContent()));
-		Result result = gson.fromJson(rd, Result.class);
+		Result<T> result = gson.fromJson(rd, Result.class);
+		gson.fromJson(rd, Result.class);
 		result.setRequest(pRequest).setResponse(response);
 		
 		if (result.getPages() > 0) {
@@ -259,5 +279,30 @@ public class BlueroverApi {
 
 	private boolean isNullOrEmpty(String str) {
 		return (str == null || str.isEmpty());
+	}
+	
+	public static void main(String[] args) throws Exception {
+		TreeMap<String, String> creds = new TreeMap<String, String>();
+		creds.put("key", "yXIJ1omZUNtbo6wNjMOkKYBLNJakn0nr/OzgVtDKh2i5lDktVT2xv5xfbYlCkW+Z");
+		creds.put("token", "9DquKlyhPKpZ35mxcjG/JUqWAd//U12O13ja6Wqp");
+		creds.put("baseURL", "http://developers.bluerover.us");
+		BlueroverApi api = new BlueroverApi().setCredentials(creds);
+//		Result<Event> result = null;
+//		try {
+//			result = api.getEvents(Objects.toString(
+//					System.currentTimeMillis() / 1000L - 10 * 1000, null), Objects
+//					.toString(System.currentTimeMillis() / 1000L, null), "0");
+//		} catch (IOException e) {
+//			System.err.println("Error with connecting to server");
+//			e.printStackTrace();
+//		}
+		Result<Device> result = null;
+		try {
+			result = api.getDevices();
+		} catch (IOException e) {
+			System.err.println("Error with connecting to server");
+			e.printStackTrace();
+		}
+		System.out.println(result);
 	}
 }

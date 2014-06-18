@@ -1,4 +1,4 @@
-package com.bluerover.api;
+package com.bluerover.model;
 
 import java.lang.reflect.Field;
 

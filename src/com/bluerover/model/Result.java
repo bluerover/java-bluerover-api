@@ -1,4 +1,4 @@
-package com.bluerover.api;
+package com.bluerover.model;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -6,37 +6,37 @@ import java.util.ArrayList;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 
-public class Result {
+public class Result<T> {
 
 	long page;
 	long results;
-	private ArrayList<Object> list;
+	private ArrayList<T> list;
 	long pages;
 	private HttpUriRequest request;
 	private HttpResponse response;
 	private HttpUriRequest next;
 
-	public Result setPage(long page) {
+	public Result<T> setPage(long page) {
 		this.page = page;
 		return this;
 	}
 
-	public Result setResults(long results) {
+	public Result<T> setResults(long results) {
 		this.results = results;
 		return this;
 	}
 
-	public Result setList(ArrayList<Object> list) {
+	public Result<T> setList(ArrayList<T> list) {
 		this.list = list;
 		return this;
 	}
 
-	public Result setPages(long pages) {
+	public Result<T> setPages(long pages) {
 		this.pages = pages;
 		return this;
 	}
 
-	public Result setRequest(HttpUriRequest request) {
+	public Result<T> setRequest(HttpUriRequest request) {
 		this.request = request;
 		return this;
 	}
@@ -45,7 +45,7 @@ public class Result {
 		return request;
 	}
 
-	public Result setNext(HttpUriRequest pRequest) {
+	public Result<T> setNext(HttpUriRequest pRequest) {
 		this.next = pRequest;
 		return this;
 	}
@@ -62,7 +62,7 @@ public class Result {
 		return results;
 	}
 
-	public ArrayList<Object> getList() {
+	public ArrayList<T> getList() {
 		return list;
 	}
 
@@ -74,7 +74,7 @@ public class Result {
 		return response;
 	}
 
-	public Result setResponse(HttpResponse response) {
+	public Result<T> setResponse(HttpResponse response) {
 		this.response = response;
 		return this;
 	}

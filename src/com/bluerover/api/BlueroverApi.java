@@ -117,6 +117,7 @@ public class BlueroverApi {
 		ApiResponse response = callApi(request);
 		Result<Rfid[]> results = gson.fromJson(response.getRawResponse(),
 				Result.class);
+		results.consume(response);
 
 		// Rfid post-processing with jsonArray
 		Iterator<JsonElement> it = results.getJsonArray().iterator();
@@ -124,7 +125,7 @@ public class BlueroverApi {
 		while (it.hasNext()) {
 			list.add(gson.fromJson(it.next(), Rfid.class));
 		}
-		results.setList((Rfid[]) list.toArray());
+		results.setList(list.toArray(new Rfid[0]));
 		return results;
 	}
 

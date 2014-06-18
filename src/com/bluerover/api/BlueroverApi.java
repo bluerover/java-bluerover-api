@@ -27,6 +27,7 @@ import com.bluerover.gson.ResultDeserializer;
 import com.bluerover.model.Device;
 import com.bluerover.model.Event;
 import com.bluerover.model.Result;
+import com.bluerover.model.Rfid;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -78,6 +79,12 @@ public class BlueroverApi {
 	public Result<Device> getDevices() throws IOException {
 		HttpGet request = generateRequest("/device", new TreeMap<String,String>(), false);
 		Result<Device> results = callApi(request); 
+		return results;
+	}
+
+	public Result<Rfid> getRfids() throws IOException {
+		HttpGet request = generateRequest("/rfid", new TreeMap<String,String>(), false);
+		Result<Rfid> results = callApi(request); 
 		return results;
 	}
 
@@ -281,28 +288,4 @@ public class BlueroverApi {
 		return (str == null || str.isEmpty());
 	}
 	
-	public static void main(String[] args) throws Exception {
-		TreeMap<String, String> creds = new TreeMap<String, String>();
-		creds.put("key", "yXIJ1omZUNtbo6wNjMOkKYBLNJakn0nr/OzgVtDKh2i5lDktVT2xv5xfbYlCkW+Z");
-		creds.put("token", "9DquKlyhPKpZ35mxcjG/JUqWAd//U12O13ja6Wqp");
-		creds.put("baseURL", "http://developers.bluerover.us");
-		BlueroverApi api = new BlueroverApi().setCredentials(creds);
-//		Result<Event> result = null;
-//		try {
-//			result = api.getEvents(Objects.toString(
-//					System.currentTimeMillis() / 1000L - 10 * 1000, null), Objects
-//					.toString(System.currentTimeMillis() / 1000L, null), "0");
-//		} catch (IOException e) {
-//			System.err.println("Error with connecting to server");
-//			e.printStackTrace();
-//		}
-		Result<Device> result = null;
-		try {
-			result = api.getDevices();
-		} catch (IOException e) {
-			System.err.println("Error with connecting to server");
-			e.printStackTrace();
-		}
-		System.out.println(result);
-	}
 }

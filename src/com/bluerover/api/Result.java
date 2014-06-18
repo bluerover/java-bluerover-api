@@ -1,54 +1,53 @@
 package com.bluerover.api;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class Result {
 
 	long page;
 	long results;
-	private ArrayList<JSONObject> list;
+	private ArrayList<Object> list;
 	long pages;
 	private HttpUriRequest request;
 	private HttpResponse response;
 	private HttpUriRequest next;
 
-	@SuppressWarnings("unchecked")
-	public Result(HttpUriRequest pRequest, HttpResponse pResponse)
-			throws ParseException, IOException {
-		request = pRequest;
-		setResponse(pResponse);
+	public Result setPage(long page) {
+		this.page = page;
+		return this;
+	}
 
-		BufferedReader rd = new BufferedReader(new InputStreamReader(pResponse
-				.getEntity().getContent()));
+	public Result setResults(long results) {
+		this.results = results;
+		return this;
+	}
 
-		StringBuffer resultBuffer = new StringBuffer();
-		String line = "";
-		while ((line = rd.readLine()) != null) {
-			resultBuffer.append(line);
-		}
-		JSONObject json = (JSONObject) new JSONParser().parse(resultBuffer
-				.toString());
-		page = (long) json.get("page");
-		results = (long) json.get("results");
-		pages = (long) json.get("pages");
-		list = (ArrayList<JSONObject>) json.get("events");
+	public Result setList(ArrayList<Object> list) {
+		this.list = list;
+		return this;
+	}
+
+	public Result setPages(long pages) {
+		this.pages = pages;
+		return this;
+	}
+
+	public Result setRequest(HttpUriRequest request) {
+		this.request = request;
+		return this;
 	}
 
 	public HttpUriRequest getRequest() {
 		return request;
 	}
 
-	public void setNext(HttpUriRequest pRequest) {
+	public Result setNext(HttpUriRequest pRequest) {
 		this.next = pRequest;
+		return this;
 	}
 
 	public HttpUriRequest getNext() {
@@ -63,7 +62,7 @@ public class Result {
 		return results;
 	}
 
-	public ArrayList<JSONObject> getList() {
+	public ArrayList<Object> getList() {
 		return list;
 	}
 
@@ -75,7 +74,19 @@ public class Result {
 		return response;
 	}
 
-	public void setResponse(HttpResponse response) {
+	public Result setResponse(HttpResponse response) {
 		this.response = response;
+		return this;
+	}
+	
+	@Override
+	public String toString() {
+		String text = "";
+		for (Field f : getClass().getDeclaredFields()) {
+		    try {
+				text += f.getName() + "=" + f.get(this) + ",";
+			} catch (Exception ignore) {}
+		}
+		return text;
 	}
 }

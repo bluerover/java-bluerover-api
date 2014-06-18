@@ -6,6 +6,6 @@
 	<classpathentry kind="lib" path="C:/Users/JLam/workspace/java-bluerover-api/lib/httpclient-4.3.4.jar"/>
 	<classpathentry kind="lib" path="C:/Users/JLam/workspace/java-bluerover-api/lib/httpcore-4.3.2.jar"/>
 	<classpathentry kind="lib" path="C:/Users/JLam/workspace/java-bluerover-api/lib/commons-logging-1.1.3.jar"/>
-	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/JLam/workspace/java-bluerover-api/lib/gson-2.2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

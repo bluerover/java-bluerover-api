@@ -1,38 +1,49 @@
 package com.bluerover.model;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 public class Result<T> {
 
-	long page;
-	long results;
-	private ArrayList<T> list;
-	long pages;
-	private HttpUriRequest request;
-	private HttpResponse response;
-	private HttpUriRequest next;
+	T list;
+	JsonObject jsonObject;
+	JsonArray jsonArray;
+	HttpUriRequest request;
+	HttpResponse response;
+	HttpUriRequest next;
+	String rawResponse;
 
-	public Result<T> setPage(long page) {
-		this.page = page;
-		return this;
+	public String getRawResponse() {
+		return rawResponse;
 	}
 
-	public Result<T> setResults(long results) {
-		this.results = results;
-		return this;
+	public void setRawResponse(String rawResponse) {
+		this.rawResponse = rawResponse;
 	}
 
-	public Result<T> setList(ArrayList<T> list) {
+	public JsonObject getJsonObject() {
+		return jsonObject;
+	}
+
+	public void setJsonObject(JsonObject jsonObject) {
+		this.jsonObject = jsonObject;
+	}
+
+	public JsonArray getJsonArray() {
+		return jsonArray;
+	}
+
+	public void setJsonArray(JsonArray jsonArray) {
+		this.jsonArray = jsonArray;
+	}
+
+	public Result<T> setList(T list) {
 		this.list = list;
-		return this;
-	}
-
-	public Result<T> setPages(long pages) {
-		this.pages = pages;
 		return this;
 	}
 
@@ -54,20 +65,29 @@ public class Result<T> {
 		return next;
 	}
 
-	public long getPage() {
-		return page;
+	public int getPage() {
+		if(jsonObject != null) {
+			return jsonObject.get("page").getAsInt();
+		}
+		return 0;
 	}
 
 	public long getResults() {
-		return results;
+		if(jsonObject != null) {
+			return jsonObject.get("results").getAsInt();
+		}
+		return 0;
 	}
 
-	public ArrayList<T> getList() {
+	public T getList() {
 		return list;
 	}
 
-	public long getPages() {
-		return pages;
+	public int getPages() {
+		if(jsonObject != null) {
+			return jsonObject.get("pages").getAsInt();
+		}
+		return 0;
 	}
 
 	public HttpResponse getResponse() {
@@ -79,12 +99,18 @@ public class Result<T> {
 		return this;
 	}
 	
+	public void consume(ApiResponse pResponse) {
+		request = pResponse.getRequest();
+		response = pResponse.getResponse();
+		rawResponse = pResponse.getRawResponse();
+	}
+	
 	@Override
 	public String toString() {
 		String text = "";
 		for (Field f : getClass().getDeclaredFields()) {
 		    try {
-				text += f.getName() + "=" + f.get(this) + ",";
+				text += "\"" + f.getName() + "\":" + f.get(this) + ",";
 			} catch (Exception ignore) {}
 		}
 		return text;

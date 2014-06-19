@@ -1,7 +1,13 @@
 BlueRover Java API
 ==================
 
-Summary: Java wrapper for connecting to the blueRover API.
+Java wrapper for connecting to the blueRover API.
+
+Dependencies (in /lib)
+------------
+
+* gson-2.2.4
+* commons-codec-1.9
 
 Public Methods
 --------------
@@ -168,3 +174,7 @@ Models
   *  `String groupID`
   *  `int lastInputState`
   *  `float lastValidLatitude`
+
+###Rfid
+
+Coming soon.

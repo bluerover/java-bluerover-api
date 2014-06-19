@@ -36,7 +36,7 @@ Public Methods
       * `String endTime` : end of the date range
       * `String page` : the particular page of results that you want (starts at page 0)
 
-      > `startTime` and `endTime` are both in UNIX timestamp format
+    > `startTime` and `endTime` are both in UNIX timestamp format
 
     **Returns:** `Result<Event[]>` object containing an array of events
 

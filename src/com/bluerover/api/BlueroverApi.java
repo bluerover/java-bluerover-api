@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import javax.crypto.Mac;
@@ -50,6 +51,11 @@ public class BlueroverApi {
 		gson = gsonBuilder.create();
 	}
 
+	/**
+	 * 
+	 * @param pMap	Map of <String,String> that contains key, token, and baseURL
+	 * @return
+	 */
 	public BlueroverApi setCredentials(TreeMap<String, String> pMap) {
 		if (isNullOrEmpty(pMap.get("key")) || isNullOrEmpty(pMap.get("token"))
 				|| isNullOrEmpty(pMap.get("baseURL"))) {
@@ -68,6 +74,14 @@ public class BlueroverApi {
 	}
 
 	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param startTime	Unix timestamp string for start time of range
+	 * @param endTime	Unix timestamp string for end of range
+	 * @param page		For pagination
+	 * @return Result<Event[]>	Result object containing list of events
+	 * @throws IOException
+	 */
 	public Result<Event[]> getEvents(String startTime, String endTime,
 			String page) throws IOException {
 		TreeMap<String, String> params = new TreeMap<String, String>();
@@ -129,17 +143,29 @@ public class BlueroverApi {
 		return results;
 	}
 
-	// public <T> Result<T> next(Result<Event> pResult) {
-	// String result = null;
-	// try {
-	// result = callApi(pResult.getNext());
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// System.err.println("Error with connecting to server");
-	// e.printStackTrace();
-	// }
-	// return result;
-	// }
+	@SuppressWarnings("unchecked")
+	/**
+	 * 
+	 * @param pResult	Result<Event[]> object that was returned before
+	 * @return			The subsequent page of events in Result<Event[]>
+	 * @throws IOException
+	 */
+	public Result<Event[]> next(Result<Event> pResult) throws IOException {
+		ApiResponse response = callApi(pResult.getNext());
+		Result<Event[]> results = gson.fromJson(response.getRawResponse(),
+				Result.class);
+		results.consume(response);
+
+		// Event post-processing with jsonObject
+		if (results.getPages() > 0) {
+			results.setNext(generateRequest(results.getRequest().getURI()));
+		}
+		Event[] events = gson.fromJson(results.getJsonObject().get("events"),
+				Event[].class);
+		results.setList(events);
+		return results;
+	}
+
 	private HttpGet generateRequest(String relativeURL,
 			TreeMap<String, String> params, boolean post_data)
 			throws MalformedURLException {
@@ -304,5 +330,32 @@ public class BlueroverApi {
 
 	private boolean isNullOrEmpty(String str) {
 		return (str == null || str.isEmpty());
+	}
+
+	public static void main(String[] args) throws Exception {
+		TreeMap<String, String> creds = new TreeMap<String, String>();
+		creds.put("key",
+				"yXIJ1omZUNtbo6wNjMOkKYBLNJakn0nr/OzgVtDKh2i5lDktVT2xv5xfbYlCkW+Z");
+		creds.put("token", "9DquKlyhPKpZ35mxcjG/JUqWAd//U12O13ja6Wqp");
+		creds.put("baseURL", "http://developers.bluerover.us");
+		BlueroverApi api = new BlueroverApi().setCredentials(creds);
+		// Result<Event[]> result = null;
+		// try {
+		// result = api.getEvents(Objects.toString(
+		// System.currentTimeMillis() / 1000L - 10 * 1000, null),
+		// Objects.toString(System.currentTimeMillis() / 1000L, null),
+		// "0");
+		// } catch (IOException e) {
+		// System.err.println("Error with connecting to server");
+		// e.printStackTrace();
+		// }
+		Result<Device[]> result = null;
+		try {
+			result = api.getDevices();
+		} catch (IOException e) {
+			System.err.println("Error with connecting to server");
+			e.printStackTrace();
+		}
+		System.out.println(result);
 	}
 }

@@ -80,4 +80,91 @@ Models
   * `String rawResponse` - the raw data string that came from the API's response
   * `T list` - Generic data, normally consisiting of Event[], Device[], or Rfid[]
 
-  > Note: either jsonObject or jsonArray will contain data, the other will be null. This is due to the format returned by the API.
+> Note: either jsonObject or jsonArray will contain data, the other will be null. This is due to the format returned by the API.
+
+###Event
+  *  `String deviceId`
+  *  `int statusCode`
+  *  `long timestamp`
+  *  `int rfidCustNum`
+  *  `int rfidTagNum`
+  *  `int rfidAlarmFlags`
+  *  `float rfidTemperature`
+  *  `float longitude`
+  *  `float latitude`
+  *  `float speedKPH`
+  *  `float zone1Avr`
+  *  `float zone2Avr`
+  *  `float zone3Avr`
+  *  `float zone4Avr`
+  *  `float zone5Avr`
+  *  `float zone6Avr`
+  *  `float zone7Avr`
+  *  `String rawData`
+
+###Device
+  *  `char isSpeedActive`
+  *  `int totalMaxConnPerMin`
+  *  `int vehicleID`
+  *  `String notes`
+  *  `char deviceAlertActive`
+  *  `int supportsDMTP`
+  *  `float staticLongitude`
+  *  `float lastValidLongitude`
+  *  `int unitLimitInterval`
+  *  `String lastAckCommand`
+  *  `String notify`
+  *  `int uniqueID`
+  *  `String featureSet`
+  *  `int duplexMaxConnPerMin`
+  *  `float speedThreshold`
+  *  `String smsEmail`
+  *  `long simPhoneNumber`
+  *  `int speedWindow`
+  *  `String duplexProfileMask`
+  *  `String pendingPingCommand`
+  *  `float staticLatitude`
+  *  `String imeiNumber`
+  *  `int maxAllowedEvents`
+  *  `String ipAddressCurrent`
+  *  `String totalProfileMask`
+  *  `String deviceType`
+  *  `char isActive`
+  *  `char isLandmarkActive`
+  *  `long lastOdometerKM`
+  *  `int listenPortCurrent`
+  *  `long odometerOffsetKM`
+  *  `String accountID`
+  *  `int timeInterval`
+  *  `char isStatic`
+  *  `char expectAck`
+  *  `String description`
+  *  `int codeVersion`
+  *  `String driverID`
+  *  `int remotePortCurrent`
+  *  `double lastUpdateTime`
+  *  `double lastConnectionTime`
+  *  `String assetTypeCode`
+  *  `String pushpinID`
+  *  `double lastPingTime`
+  *  `long totalPingCount`
+  *  `double lastDuplexConnectTime`
+  *  `String dcsConfigMask`
+  *  `String doh`
+  *  `double lastAckTime`
+  *  `String displayName`
+  *  `String supportedEncodings`
+  *  `int ipAddressValid`
+  *  `double lastGPSTimestamp`
+  *  `int totalMaxConn`
+  *  `String serialNumber`
+  *  `double creationTime`
+  *  `int equipmentType`
+  *  `String ignitionIndex`
+  *  `String deviceID`
+  *  `String deviceCode`
+  *  `int maxPingCount`
+  *  `int duplexMaxConn`
+  *  `String groupID`
+  *  `int lastInputState`
+  *  `float lastValidLatitude`

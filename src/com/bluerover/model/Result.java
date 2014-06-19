@@ -2,8 +2,8 @@ package com.bluerover.model;
 
 import java.lang.reflect.Field;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
+import com.bluerover.http.HttpRequest;
+import com.bluerover.http.HttpResponse;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -13,9 +13,9 @@ public class Result<T> {
 	T list;
 	JsonObject jsonObject;
 	JsonArray jsonArray;
-	HttpUriRequest request;
+	HttpRequest request;
 	HttpResponse response;
-	HttpUriRequest next;
+	HttpRequest next;
 	String rawResponse;
 
 	public String getRawResponse() {
@@ -47,21 +47,21 @@ public class Result<T> {
 		return this;
 	}
 
-	public Result<T> setRequest(HttpUriRequest request) {
+	public Result<T> setRequest(HttpRequest request) {
 		this.request = request;
 		return this;
 	}
 
-	public HttpUriRequest getRequest() {
+	public HttpRequest getRequest() {
 		return request;
 	}
 
-	public Result<T> setNext(HttpUriRequest pRequest) {
+	public Result<T> setNext(HttpRequest pRequest) {
 		this.next = pRequest;
 		return this;
 	}
 
-	public HttpUriRequest getNext() {
+	public HttpRequest getNext() {
 		return next;
 	}
 

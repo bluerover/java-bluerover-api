@@ -2,29 +2,25 @@ package com.bluerover.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.TreeMap;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClients;
 
 import com.bluerover.gson.ResultDeserializer;
+import com.bluerover.http.HttpClient;
+import com.bluerover.http.HttpRequest;
+import com.bluerover.http.HttpResponse;
 import com.bluerover.model.ApiResponse;
 import com.bluerover.model.Device;
 import com.bluerover.model.Event;
@@ -53,7 +49,8 @@ public class BlueroverApi {
 
 	/**
 	 * 
-	 * @param pMap	Map of <String,String> that contains key, token, and baseURL
+	 * @param pMap
+	 *            Map of <String,String> that contains key, token, and baseURL
 	 * @return
 	 */
 	public BlueroverApi setCredentials(TreeMap<String, String> pMap) {
@@ -88,7 +85,7 @@ public class BlueroverApi {
 		params.put("start_time", startTime);
 		params.put("end_time", endTime);
 		params.put("page", page);
-		HttpGet request = generateRequest("/event", params, false);
+		HttpRequest request = generateRequest("/event", params, false);
 		ApiResponse response = callApi(request);
 		Result<Event[]> results = gson.fromJson(response.getRawResponse(),
 				Result.class);
@@ -96,7 +93,7 @@ public class BlueroverApi {
 
 		// Event post-processing with jsonObject
 		if (results.getPages() > 0) {
-			results.setNext(generateRequest(results.getRequest().getURI()));
+			results.setNext(generateRequest(new URL(results.getRequest().getURL())));
 		}
 		Event[] events = gson.fromJson(results.getJsonObject().get("events"),
 				Event[].class);
@@ -107,7 +104,7 @@ public class BlueroverApi {
 
 	@SuppressWarnings("unchecked")
 	public Result<Device[]> getDevices() throws IOException {
-		HttpGet request = generateRequest("/device",
+		HttpRequest request = generateRequest("/device",
 				new TreeMap<String, String>(), false);
 		ApiResponse response = callApi(request);
 		Result<Device[]> results = gson.fromJson(response.getRawResponse(),
@@ -126,7 +123,7 @@ public class BlueroverApi {
 
 	@SuppressWarnings("unchecked")
 	public Result<Rfid[]> getRfids() throws IOException {
-		HttpGet request = generateRequest("/rfid",
+		HttpRequest request = generateRequest("/rfid",
 				new TreeMap<String, String>(), false);
 		ApiResponse response = callApi(request);
 		Result<Rfid[]> results = gson.fromJson(response.getRawResponse(),
@@ -158,7 +155,7 @@ public class BlueroverApi {
 
 		// Event post-processing with jsonObject
 		if (results.getPages() > 0) {
-			results.setNext(generateRequest(results.getRequest().getURI()));
+			results.setNext(generateRequest(new URL(results.getRequest().getURL())));
 		}
 		Event[] events = gson.fromJson(results.getJsonObject().get("events"),
 				Event[].class);
@@ -166,7 +163,7 @@ public class BlueroverApi {
 		return results;
 	}
 
-	private HttpGet generateRequest(String relativeURL,
+	private HttpRequest generateRequest(String relativeURL,
 			TreeMap<String, String> params, boolean post_data)
 			throws MalformedURLException {
 		// Post data not supported yet
@@ -189,14 +186,17 @@ public class BlueroverApi {
 			}
 			endpointURL += joinedParams.substring(0, joinedParams.length() - 1);
 		}
-		HttpGet request = new HttpGet(endpointURL);
-		request.addHeader("Authorization", "BR " + this.token + ":" + signature);
+		HashMap<String, String> requestHeaders = new HashMap<String, String>();
+		requestHeaders.put("Authorization", "BR " + this.token + ":"
+				+ signature);
+		HttpRequest request = new HttpRequest(http_method, endpointURL, params,
+				requestHeaders);
 		return request;
 	}
 
-	private HttpGet generateRequest(URI pUri) throws MalformedURLException {
+	private HttpRequest generateRequest(URL pUrl) throws MalformedURLException {
 
-		String[] queryParams = pUri.getQuery().split("&");
+		String[] queryParams = pUrl.getQuery().split("&");
 		TreeMap<String, String> params = new TreeMap<String, String>();
 		for (String param : queryParams) {
 			String[] tmp = param.split("=");
@@ -206,7 +206,7 @@ public class BlueroverApi {
 		params.put("page",
 				Integer.toString(Integer.parseInt(params.get("page") + 1)));
 
-		return generateRequest(pUri.getPath(), params, false);
+		return generateRequest(pUrl.getPath(), params, false);
 	}
 
 	/**
@@ -219,26 +219,24 @@ public class BlueroverApi {
 	 *             Gson TypeToken does not allow for a generic type, so it is
 	 *             binded to the higher class in the stack
 	 */
-	private ApiResponse callApi(HttpUriRequest pRequest) throws IOException {
-		System.out.println("Making request to " + pRequest.getURI().toString());
-		HttpClient client = HttpClients.createDefault();
+	private ApiResponse callApi(HttpRequest pRequest) throws IOException {
+		System.out.println("Making request to " + pRequest.getURL());
+		HttpClient client = new HttpClient(null);
 		HttpResponse response = null;
 		try {
-			response = client.execute(pRequest);
+			response = client.handleRequest(pRequest);
 		} catch (IOException e) {
-			System.err.println("Request to " + pRequest.getURI().toString()
-					+ " failed:");
+			System.err.println("Request to " + pRequest.getURL() + " failed:");
 			e.printStackTrace();
 			throw e;
 		}
 
 		System.out.println("Response Code : "
-				+ response.getStatusLine().getStatusCode());
-		if (response.getStatusLine().getStatusCode() == 403) {
+				+ response.getStatusCode());
+		if (response.getStatusCode() == 403) {
 			throw new SecurityException("invalid credentials");
 		}
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response
-				.getEntity().getContent()));
+		BufferedReader rd = (BufferedReader)response.asReader();
 		StringBuffer result = new StringBuffer();
 		String line = "";
 		while ((line = rd.readLine()) != null) {
@@ -253,9 +251,27 @@ public class BlueroverApi {
 	}
 
 	@SuppressWarnings("unused")
-	private String streamApi(String relativeURL,
-			TreeMap<String, String> params, boolean post_data) {
-		throw new UnsupportedOperationException("Not implemented");
+	private ApiResponse streamApi(HttpRequest pRequest) throws Exception {
+		System.out.println("Making stream request to " + pRequest.getURL());
+		HttpClient client = new HttpClient(null);
+		HttpResponse response = null;
+		try {
+			response = client.handleRequest(pRequest);
+		} catch (Exception e) {
+			System.err.println("Request to " + pRequest.getURL() + " failed:");
+			e.printStackTrace();
+			throw e;
+		}
+
+		System.out.println("Response Code : " + response.getStatusCode());
+		if (response.getStatusCode() == 403) {
+			throw new SecurityException("invalid credentials");
+		}
+
+		ApiResponse apiResponse = new ApiResponse();
+		apiResponse.setRequest(pRequest).setResponse(response);
+
+		return apiResponse;
 	}
 
 	private String generateSignature(String pKey, String pMethod, URL pUrl,

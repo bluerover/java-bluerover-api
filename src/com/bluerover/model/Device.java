@@ -13,12 +13,12 @@ public class Device {
 	float lastValidLongitude;
 	int unitLimitInterval;
 	String lastAckCommand;
-	String notify; //?
+	String notify;
 	int uniqueID;
 	String featureSet;
 	int duplexMaxConnPerMin;
 	float speedThreshold;
-	String smsEmail; //?
+	String smsEmail;
 	long simPhoneNumber;
 	int speedWindow;
 	String duplexProfileMask;

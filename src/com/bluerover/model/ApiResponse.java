@@ -2,20 +2,20 @@ package com.bluerover.model;
 
 import java.lang.reflect.Field;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
+import com.bluerover.http.HttpRequest;
+import com.bluerover.http.HttpResponse;
 
 public class ApiResponse {
 
-	HttpUriRequest request;
+	HttpRequest request;
 	HttpResponse response;
 	String rawResponse;
 
-	public HttpUriRequest getRequest() {
+	public HttpRequest getRequest() {
 		return request;
 	}
 
-	public ApiResponse setRequest(HttpUriRequest request) {
+	public ApiResponse setRequest(HttpRequest request) {
 		this.request = request;
 		return this;
 	}

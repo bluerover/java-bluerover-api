@@ -6,57 +6,57 @@ Summary: Java wrapper for connecting to the blueRover API.
 Public Methods
 --------------
 
-1. `BlueroverApi` **api.setCredentials**(*creds*)
+* `BlueroverApi` **api.setCredentials**(*creds*)
 
-      Sets the credentials of the Bluerover API object.
+    Sets the credentials of the Bluerover API object.
       
-      **Parameters:**
+    **Parameters:**
       
-      The credentials should be a `Map<String,String>` containing the following:
+    `HashMap<String,String> creds` : API credentials containing the following:
       
       *   `String key` : authentication key for your user
       *   `String token` : authentication token for your user
       *   `String baseURL` : the address where you are pointing to, normally **developers.bluerover.us**
       
-      **Returns:** `BlueroverApi` object
-    
-1. `void` **api.clearCredentials**()
+    **Returns:** `BlueroverApi` object
+
+* `void` **api.clearCredentials**()
 
     **Parameters:** None
-  
+
     Remove the key and token values from the API object.
 
-1. `Result<Event[]>` **api.getEvents**(*startTime*,*endTime*,*String page*)
+* `Result<Event[]>` **api.getEvents**(*startTime*,*endTime*,*String page*)
 
     API Request to get events from a particular date range.
-    
+
     **Parameters:**
-    
+
       * `String startTime` : beginning of the date range
       * `String endTime` : end of the date range
       * `String page` : the particular page of results that you want (starts at page 0)
-    
+
       > `startTime` and `endTime` are both in UNIX timestamp format
-    
+
     **Returns:** `Result<Event[]>` object containing an array of events
 
-1. `Result<Device[]>` **api.getDevices**()
+* `Result<Device[]>` **api.getDevices**()
 
     API Request to get a list of devices for the user
-  
+
     **Parameters:** None
-    
+
     **Returns:** `Result<Device[]>` object containing an array of devices
 
-1. `Result<Rfid[]>` **api.getRfids**()
+* `Result<Rfid[]>` **api.getRfids**()
 
     API Request to get a list of rfids for the user
-    
+
     **Parameters:** None
-    
+
     **Returns:** `Result<Rfid[]>` object containing an array of rfids
 
-1. `Result<Event[]>` **api.next**(*pResult*)
+* `Result<Event[]>` **api.next**(*pResult*)
 
     API Request to get the next page of events.
 

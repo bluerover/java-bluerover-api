@@ -32,7 +32,7 @@ Public Methods
 
     Remove the key and token values from the API object.
 
-* `Result<Event[]>` **api.getEvents**(*startTime*,*endTime*,*String page*)
+* `Result<Event[]>` **api.getEvents**(*startTime*,*endTime*,*page*)
 
     API Request to get events from a particular date range.
 

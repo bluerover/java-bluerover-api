@@ -78,13 +78,15 @@ Models
 
 ###Result<T>
 
+  * `T list` - Represents the json decoded data returned the API server
+
+    >  Based on the function you call, the list property will represent an array of `Event`, `Device` or `Rfid` java objects 
   * `JsonObject jsonObject` - a GSON jSON object that encapsulates the API's response
   * `JsonArray jsonArray` - a GSON jSON array that encapsulates the API's response
   * `HttpRequest request` - copy of the request made to the API
   * `HttpResponse response` - copy of the response made to the API
   * `HttpRequest next` - a request object that can be used to get the next page of results (for Event[])
   * `String rawResponse` - the raw data string that came from the API's response
-  * `T list` - Generic data, normally consisiting of Event[], Device[], or Rfid[]
 
 > Note: either jsonObject or jsonArray will contain data, the other will be null. This is due to the format returned by the API.
 

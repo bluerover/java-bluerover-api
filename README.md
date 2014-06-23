@@ -71,7 +71,16 @@ Public Methods
       * `Result<Event[]> pResult` : Result object of the previous page of events
 
     **Returns:** `Result<Event[]>` object containing an array of events
+
+* `Result<Event[]>` **api.getEventStream**(*pCallBack*)
+
+    API Request to start the event stream, calling pCallBack when data is received.
     
+    Define pCallBack by implementing the CallBack class.
+
+    **Parameters:**
+
+      * `CallBack pCallBack` : Implementation of CallBack that defines behaviour on data received
 
 Models
 ------
@@ -92,15 +101,34 @@ Models
 
 ###Event
   *  `String deviceId`
+  *  `long autoIndex`
   *  `int statusCode`
   *  `long timestamp`
+  *  `long creationTime`
+  *  `int geozoneIndex`
+  *  `String geozoneID`
+  *  `String transportID`
+  *  `int inputMask`
+  *  `int seqNum`
+  *  `String dataSource`
+  *  `String charDeviceType`
+  *  `String charDeviceResponse`
+  *  `float heading`
+  *  `String address`
   *  `int rfidCustNum`
   *  `int rfidTagNum`
   *  `int rfidAlarmFlags`
+  *  `int rfidBatteryStatus`
+  *  `int rfidRssi`
+  *  `int rfidReaderId`
+  *  `int rfidReaderType`
   *  `float rfidTemperature`
   *  `float longitude`
   *  `float latitude`
+  *  `float altitude`
   *  `float speedKPH`
+  *  `float odometerKM`
+  *  `float distanceKM`
   *  `float zone1Avr`
   *  `float zone2Avr`
   *  `float zone3Avr`
@@ -108,6 +136,23 @@ Models
   *  `float zone5Avr`
   *  `float zone6Avr`
   *  `float zone7Avr`
+  *  `float zone8Avr`
+  *  `float zone1Low`
+  *  `float zone2Low`
+  *  `float zone3Low`
+  *  `float zone4Low`
+  *  `float zone5Low`
+  *  `float zone6Low`
+  *  `float zone7Low`
+  *  `float zone8Low`
+  *  `float zone1High`
+  *  `float zone2High`
+  *  `float zone3High`
+  *  `float zone4High`
+  *  `float zone5High`
+  *  `float zone6High`
+  *  `float zone7High`
+  *  `float zone8High`
   *  `String rawData`
 
 ###Device

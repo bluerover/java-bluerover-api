@@ -181,6 +181,8 @@ public class HttpClient implements Serializable {
 	    private HttpURLConnection getConnection(String url) throws IOException {
 	        HttpURLConnection con;
 	        con = (HttpURLConnection) new URL(url).openConnection();
+	        con.setConnectTimeout(4*60*1000);
+	        con.setReadTimeout(4*60*1000);
 //	        if (CONF.getHttpConnectionTimeout() > 0) {
 //	            con.setConnectTimeout(CONF.getHttpConnectionTimeout());
 //	        }

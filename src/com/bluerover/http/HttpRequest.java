@@ -51,7 +51,8 @@ public class HttpRequest implements Serializable {
         return requestHeaders;
     }
 
-    private String encodeURI(String s) {
+    @SuppressWarnings("unused")
+	private String encodeURI(String s) {
 		String result = null;
 
 		try {

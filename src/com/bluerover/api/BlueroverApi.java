@@ -2,6 +2,7 @@ package com.bluerover.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,6 +18,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 
+import com.bluerover.events.CallBack;
 import com.bluerover.gson.ResultDeserializer;
 import com.bluerover.http.HttpClient;
 import com.bluerover.http.HttpRequest;
@@ -29,6 +31,7 @@ import com.bluerover.model.Rfid;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 
 public class BlueroverApi {
 
@@ -93,7 +96,8 @@ public class BlueroverApi {
 
 		// Event post-processing with jsonObject
 		if (results.getPages() > 0) {
-			results.setNext(generateRequest(new URL(results.getRequest().getURL())));
+			results.setNext(generateRequest(new URL(results.getRequest()
+					.getURL())));
 		}
 		Event[] events = gson.fromJson(results.getJsonObject().get("events"),
 				Event[].class);
@@ -140,6 +144,47 @@ public class BlueroverApi {
 		return results;
 	}
 
+	public void getEventStream(CallBack callback) throws IOException {
+		HttpRequest request = generateRequest("/eventstream",
+				new TreeMap<String, String>(), false);
+		ApiResponse response = streamApi(request);
+		BufferedReader br = new BufferedReader(new InputStreamReader(response
+				.getResponse().asStream()));
+		StringBuffer buffer = new StringBuffer();
+		char[] tmp = new char[1];
+		while (true) {
+			try {
+				if (br.ready()) {
+					@SuppressWarnings("unused")
+					int count = br.read(tmp, 0, 1);
+					buffer.append(tmp);
+					if (buffer.toString().contains("\r\n")
+							&& !buffer.toString().isEmpty()) {
+						if (buffer.toString().equalsIgnoreCase("\r\n")) {
+							// Flush the buffer because we don't want \r\n
+							buffer = new StringBuffer();
+						}
+						// can only handle single level json objects
+						while (buffer.indexOf("}") != -1) {
+							String json = buffer.substring(0,
+									buffer.indexOf("}") + 1);
+							callback.onData(gson.fromJson(json, Event.class));
+							buffer = new StringBuffer(buffer.substring(json
+									.length()));
+						}
+					}
+				}
+			} catch (JsonParseException jsone) {
+				System.err
+						.println("Could not parse JSON " + jsone.getMessage());
+				System.out.println("clearing buffer");
+				buffer = new StringBuffer();
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	/**
 	 * 
@@ -155,7 +200,8 @@ public class BlueroverApi {
 
 		// Event post-processing with jsonObject
 		if (results.getPages() > 0) {
-			results.setNext(generateRequest(new URL(results.getRequest().getURL())));
+			results.setNext(generateRequest(new URL(results.getRequest()
+					.getURL())));
 		}
 		Event[] events = gson.fromJson(results.getJsonObject().get("events"),
 				Event[].class);
@@ -231,12 +277,11 @@ public class BlueroverApi {
 			throw e;
 		}
 
-		System.out.println("Response Code : "
-				+ response.getStatusCode());
+		System.out.println("Response Code : " + response.getStatusCode());
 		if (response.getStatusCode() == 403) {
 			throw new SecurityException("invalid credentials");
 		}
-		BufferedReader rd = (BufferedReader)response.asReader();
+		BufferedReader rd = (BufferedReader) response.asReader();
 		StringBuffer result = new StringBuffer();
 		String line = "";
 		while ((line = rd.readLine()) != null) {
@@ -250,8 +295,7 @@ public class BlueroverApi {
 		return apiResponse;
 	}
 
-	@SuppressWarnings("unused")
-	private ApiResponse streamApi(HttpRequest pRequest) throws Exception {
+	private ApiResponse streamApi(HttpRequest pRequest) throws IOException {
 		System.out.println("Making stream request to " + pRequest.getURL());
 		HttpClient client = new HttpClient(null);
 		HttpResponse response = null;
@@ -270,7 +314,6 @@ public class BlueroverApi {
 
 		ApiResponse apiResponse = new ApiResponse();
 		apiResponse.setRequest(pRequest).setResponse(response);
-
 		return apiResponse;
 	}
 
@@ -347,4 +390,5 @@ public class BlueroverApi {
 	private boolean isNullOrEmpty(String str) {
 		return (str == null || str.isEmpty());
 	}
+
 }

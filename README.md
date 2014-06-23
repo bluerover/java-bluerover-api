@@ -72,7 +72,7 @@ Public Methods
 
     **Returns:** `Result<Event[]>` object containing an array of events
 
-* `Result<Event[]>` **api.getEventStream**(*pCallBack*)
+* `void` **api.getEventStream**(*pCallBack*)
 
     API Request to start the event stream, calling pCallBack when data is received.
     

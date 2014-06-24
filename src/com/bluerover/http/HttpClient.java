@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -64,10 +65,8 @@ public class HttpClient implements Serializable {
 	    }
 
 	    public HttpResponse handleRequest(HttpRequest req) throws IOException {
-	    	int retriedCount;
-	        int retry = 5;
 	        HttpResponse res = null;
-	        for (retriedCount = 0; retriedCount < retry; retriedCount++) {
+	        while(true) {
 	            int responseCode = -1;
 	            try {
 	                HttpURLConnection con;
@@ -150,7 +149,6 @@ public class HttpClient implements Serializable {
 	                    	else {
 	                    		throw new UnsupportedOperationException("");
 	                    	}
-	                        
 	                    } else {
 	                        break;
 	                    }
@@ -160,10 +158,9 @@ public class HttpClient implements Serializable {
 	                    } catch (Exception ignore) {
 	                    }
 	                }
-	            } catch (IOException ioe) {
+	            } catch (SocketTimeoutException ste) {
 	                // connection timeout or read timeout
-	            	System.err.println("oh no, io exception " + ioe.getMessage());
-	            	ioe.printStackTrace();
+	            	System.err.println("oh no, io exception " + ste.getMessage());
 	            }
 	        }
 	        return res;
@@ -183,12 +180,6 @@ public class HttpClient implements Serializable {
 	        con = (HttpURLConnection) new URL(url).openConnection();
 	        con.setConnectTimeout(4*60*1000);
 	        con.setReadTimeout(4*60*1000);
-//	        if (CONF.getHttpConnectionTimeout() > 0) {
-//	            con.setConnectTimeout(CONF.getHttpConnectionTimeout());
-//	        }
-//	        if (CONF.getHttpReadTimeout() > 0) {
-//	            con.setReadTimeout(CONF.getHttpReadTimeout());
-//	        }
 	        con.setInstanceFollowRedirects(false);
 	        return con;
 	    }

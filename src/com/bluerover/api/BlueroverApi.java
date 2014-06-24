@@ -144,10 +144,11 @@ public class BlueroverApi {
 		return results;
 	}
 
-	public void getEventStream(CallBack callback) throws IOException {
+	public void getEventStream(CallBack callback) throws MalformedURLException, IOException {
 		HttpRequest request = generateRequest("/eventstream",
 				new TreeMap<String, String>(), false);
-		ApiResponse response = streamApi(request);
+		ApiResponse response = null;
+		response = streamApi(request);
 		BufferedReader br = new BufferedReader(new InputStreamReader(response
 				.getResponse().asStream()));
 		StringBuffer buffer = new StringBuffer();
@@ -179,7 +180,8 @@ public class BlueroverApi {
 						.println("Could not parse JSON " + jsone.getMessage());
 				System.out.println("clearing buffer");
 				buffer = new StringBuffer();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
 		}
@@ -295,7 +297,7 @@ public class BlueroverApi {
 		return apiResponse;
 	}
 
-	private ApiResponse streamApi(HttpRequest pRequest) throws IOException {
+	private ApiResponse streamApi(HttpRequest pRequest) {
 		System.out.println("Making stream request to " + pRequest.getURL());
 		HttpClient client = new HttpClient(null);
 		HttpResponse response = null;
@@ -304,9 +306,7 @@ public class BlueroverApi {
 		} catch (Exception e) {
 			System.err.println("Request to " + pRequest.getURL() + " failed:");
 			e.printStackTrace();
-			throw e;
 		}
-
 		System.out.println("Response Code : " + response.getStatusCode());
 		if (response.getStatusCode() == 403) {
 			throw new SecurityException("invalid credentials");
@@ -390,5 +390,4 @@ public class BlueroverApi {
 	private boolean isNullOrEmpty(String str) {
 		return (str == null || str.isEmpty());
 	}
-
 }
